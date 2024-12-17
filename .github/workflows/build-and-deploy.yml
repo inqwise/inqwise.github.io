@@ -1,5 +1,5 @@
 # .github/workflows/build-and-deploy.yml
-name: Build and Deploy Markdown to HTML
+name: Build and Deploy Markdown to HTML with CSS
 
 on:
   push:
@@ -25,7 +25,6 @@ jobs:
           sudo apt-get install -y pandoc
 
       # Step 3: Install LaTeX packages (Optional)
-      # Install LaTeX packages if your Markdown uses LaTeX
       - name: Install LaTeX Packages
         run: |
           sudo apt-get install -y texlive-latex-extra
@@ -34,12 +33,19 @@ jobs:
       - name: Convert Markdown to HTML
         run: |
           mkdir -p public  # Create the public directory if it doesn't exist
+          
+          # Copy CSS files to the public directory
+          cp -r styles public/styles
+          
+          # Convert each Markdown file to HTML with the CSS linked
           find src -name "*.md" | while read md; do
             # Define the output HTML path
             html="public/${md#src/}"
             html="${html%.md}.html"
             mkdir -p "$(dirname "$html")"  # Create directories as needed
-            pandoc "$md" -o "$html"  # Convert Markdown to HTML
+            
+            # Convert Markdown to HTML, linking the CSS
+            pandoc "$md" -o "$html" -c styles/main.css --metadata title="$(basename "$md" .md)"
           done
 
       # Step 5: Deploy to GitHub Pages
@@ -47,7 +53,6 @@ jobs:
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_branch: main
           publish_dir: ./public  # Directory to publish
-          # For user/organization pages, no need to specify the branch
+          # For user/organization sites, no need to specify the branch
           # It defaults to the repository's GitHub Pages settings
