@@ -4,7 +4,7 @@ name: Build and Deploy Markdown to HTML with CSS
 on:
   push:
     branches:
-      - main  # Triggers the workflow on push to main branch
+      - main  # Triggers the workflow on push to the main branch
 
 jobs:
   build-and-deploy:
@@ -25,34 +25,44 @@ jobs:
           sudo apt-get install -y pandoc
 
       # Step 3: Install LaTeX packages (Optional)
+      # Install LaTeX packages if your Markdown uses LaTeX
       - name: Install LaTeX Packages
         run: |
           sudo apt-get install -y texlive-latex-extra
 
-      # Step 4: Convert Markdown to HTML
-      - name: Convert Markdown to HTML
+      # Step 4: Prepare Public Directory and Assets
+      - name: Prepare Public Directory
         run: |
-          mkdir -p public  # Create the public directory if it doesn't exist
+          mkdir -p public
           
           # Copy CSS files to the public directory
           cp -r styles public/styles
           
-          # Convert each Markdown file to HTML with the CSS linked
+          # If you have images or other assets, copy them here
+          # Uncomment and modify the following line if needed:
+          # cp -r src/images public/images
+
+      # Step 5: Convert Markdown to HTML
+      - name: Convert Markdown to HTML
+        run: |
+          # Find all Markdown files in src/ and convert them
           find src -name "*.md" | while read md; do
-            # Define the output HTML path
+            # Define the output HTML path by replacing 'src/' with 'public/' and changing extension to .html
             html="public/${md#src/}"
             html="${html%.md}.html"
-            mkdir -p "$(dirname "$html")"  # Create directories as needed
             
-            # Convert Markdown to HTML, linking the CSS
-            pandoc "$md" -o "$html" -c styles/main.css --metadata title="$(basename "$md" .md)"
+            # Create necessary directories in public/
+            mkdir -p "$(dirname "$html")"
+            
+            # Convert Markdown to HTML with standalone flag and link CSS
+            pandoc "$md" -o "$html" -s -c styles/main.css --metadata title="$(basename "$md" .md)"
           done
 
-      # Step 5: Deploy to GitHub Pages
+      # Step 6: Deploy to GitHub Pages
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./public  # Directory to publish
-          # For user/organization sites, no need to specify the branch
+          # For user/organization sites (username.github.io), no need to specify the branch
           # It defaults to the repository's GitHub Pages settings
