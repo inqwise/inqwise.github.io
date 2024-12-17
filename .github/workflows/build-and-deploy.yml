@@ -1,5 +1,5 @@
 # .github/workflows/build-and-deploy.yml
-name: Build and Deploy Markdown to HTML with CSS
+name: Build and Deploy Markdown to HTML with Custom CSS and Title Formatting
 
 on:
   push:
@@ -25,7 +25,6 @@ jobs:
           sudo apt-get install -y pandoc
 
       # Step 3: Install LaTeX packages (Optional)
-      # Install LaTeX packages if your Markdown uses LaTeX
       - name: Install LaTeX Packages
         run: |
           sudo apt-get install -y texlive-latex-extra
@@ -38,11 +37,15 @@ jobs:
           # Copy CSS files to the public directory
           cp -r styles public/styles
           
-          # If you have images or other assets, copy them here
-          # Uncomment and modify the following line if needed:
+          # Copy images and other assets if they exist
+          # Uncomment and modify the following lines if needed:
           # cp -r src/images public/images
+          
+          # Copy custom template to public/ (if necessary)
+          # If the template is used via relative path, no need to copy
+          # cp templates/custom-template.html public/templates/custom-template.html
 
-      # Step 5: Convert Markdown to HTML
+      # Step 5: Convert Markdown to HTML Using Custom Template and Replace Hyphens
       - name: Convert Markdown to HTML
         run: |
           # Find all Markdown files in src/ and convert them
@@ -54,8 +57,14 @@ jobs:
             # Create necessary directories in public/
             mkdir -p "$(dirname "$html")"
             
-            # Convert Markdown to HTML with standalone flag and link CSS
-            pandoc "$md" -o "$html" -s -c styles/main.css --metadata title="$(basename "$md" .md)"
+            # Extract the base filename without extension
+            base_name="$(basename "$md" .md)"
+            
+            # Replace hyphens with spaces in the title
+            formatted_title="${base_name//-/ }"
+            
+            # Convert Markdown to HTML with standalone flag, custom template, and link CSS
+            pandoc "$md" -o "$html" -s --template=templates/custom-template.html -c styles/main.css --metadata title="$formatted_title"
           done
 
       # Step 6: Deploy to GitHub Pages
@@ -64,5 +73,5 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./public  # Directory to publish
-          # For user/organization sites (username.github.io), no need to specify the branch
+          # For user/organization sites, no need to specify the branch
           # It defaults to the repository's GitHub Pages settings
