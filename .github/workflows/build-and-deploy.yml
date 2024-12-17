@@ -1,0 +1,52 @@
+# .github/workflows/build-and-deploy.yml
+name: Build and Deploy Markdown to HTML
+
+on:
+  push:
+    branches:
+      - main  # Triggers the workflow on push to main branch
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest  # Uses the latest Ubuntu runner
+
+    steps:
+      # Step 1: Checkout the repository
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false  # Ensures GITHUB_TOKEN is not persisted
+          fetch-depth: 0  # Fetches all history for all branches and tags
+
+      # Step 2: Install Pandoc
+      - name: Install Pandoc
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pandoc
+
+      # Step 3: Install LaTeX packages (Optional)
+      # Install LaTeX packages if your Markdown uses LaTeX
+      - name: Install LaTeX Packages
+        run: |
+          sudo apt-get install -y texlive-latex-extra
+
+      # Step 4: Convert Markdown to HTML
+      - name: Convert Markdown to HTML
+        run: |
+          mkdir -p public  # Create the public directory if it doesn't exist
+          find src -name "*.md" | while read md; do
+            # Define the output HTML path
+            html="public/${md#src/}"
+            html="${html%.md}.html"
+            mkdir -p "$(dirname "$html")"  # Create directories as needed
+            pandoc "$md" -o "$html"  # Convert Markdown to HTML
+          done
+
+      # Step 5: Deploy to GitHub Pages
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public  # Directory to publish
+          # For user/organization pages, no need to specify the branch
+          # It defaults to the repository's GitHub Pages settings
