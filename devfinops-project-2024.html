@@ -1,0 +1,421 @@
+<h1 id="devfinops-project-2024">DevFinOps Project 2024</h1>
+<p><strong>Project Status:</strong> Completed<br />
+<strong>Last Updated:</strong> December 17, 2024</p>
+<h2 id="introduction">Introduction</h2>
+<p>As a technical enthusiast, I am always investigating and researching
+different aspects of the digital universe. Last year, I focused my
+research on <strong>“Environment Costing”</strong>, which explores how
+to create cloud application environments with minimal costs. This
+project, <strong>DevFinOps</strong>, embodies the principles of DevOps,
+FinOps, and operational excellence to achieve cost-effective, secure,
+and automated cloud infrastructures.</p>
+<p>This project was collaboratively processed by the <strong>Inqwise
+Team</strong>, leveraging our collective expertise to transform legacy
+environments into flexible, secure, and cost-aware AWS-based
+deployments. By employing automated processes, golden images, managed
+services, and well-defined CI/CD pipelines, we have achieved a more
+resilient and financially predictable infrastructure.</p>
+<h2 id="initial-state-of-the-project">Initial State of the Project</h2>
+<p>For our research, we selected a medium-active project with active
+clients and <strong>12 instances</strong> running on the AWS
+environment. This baseline state of the application is referred to as
+the <strong>“origin”</strong> environment.</p>
+<p>One of our long-standing clients requested an update to their
+outdated infrastructure and the setup of an additional staging
+environment for their application. The project had several key
+objectives:</p>
+<ul>
+<li><p><strong>Automation and Modernization:</strong><br />
+Automate the processes of updating the application servers to simplify
+infrastructure management and increase overall stability.</p></li>
+<li><p><strong>Security and Resource Optimization:</strong><br />
+Ensure system security, including regular updates and resource
+reallocation, to minimize risks and improve reliability.</p></li>
+<li><p><strong>Cost-Effectiveness:</strong><br />
+Identify more affordable resource alternatives without degrading
+performance or reliability.</p></li>
+</ul>
+<h2 id="definition-and-aims-of-the-project">Definition and Aims of the
+Project</h2>
+<p>The project involved setting up <strong>two environments on
+AWS</strong>: <strong>Staging (STG)</strong> and <strong>Production
+(PROD)</strong>. The STG environment utilizes native AWS services that
+are scheduled to be active during business hours and offline at night
+and on weekends to reduce costs. Repositories and CI/CD pipelines are
+managed on the GitHub platform.</p>
+<h3 id="project-goals">Project Goals</h3>
+<ul>
+<li><p><strong>Deploy Two AWS Environments:</strong><br />
+Establish separate staging and production environments with optimized
+configurations for cost and performance.</p></li>
+<li><p><strong>Implement CI/CD Pipelines:</strong><br />
+Use GitHub for continuous integration and deployment to streamline
+updates and maintenance.</p></li>
+<li><p><strong>Optimize Resource Usage:</strong><br />
+Schedule non-essential services to reduce operational costs without
+affecting performance during peak times.</p></li>
+</ul>
+<h2 id="short-result-of-the-project">Short Result of the Project</h2>
+<p>After <strong>three months</strong> of development and optimization,
+the <strong>Inqwise Team</strong> successfully completed the deployment
+and redirected all client traffic to the production environment. The
+updated infrastructure meets the objectives of automation, security,
+resource optimization, and cost-effectiveness.</p>
+<h2 id="services-for-environment">Services for Environment</h2>
+<h3 id="nativeaws-managed-services">Native/AWS Managed Services</h3>
+<ul>
+<li><strong>Native Services:</strong><br />
+Services installed and managed via CI/CD as spot/on-demand instances:
+<ul>
+<li>Application Front/API</li>
+<li>MySQL</li>
+<li>Redis</li>
+<li>VPN</li>
+<li>Elasticsearch</li>
+<li>Kafka</li>
+<li>Logstash</li>
+<li>Loki/Grafana</li>
+</ul></li>
+<li><strong>AWS Managed Services:</strong><br />
+Services managed directly by AWS to ensure reliability and reduce
+operational overhead:
+<ul>
+<li><strong>S3:</strong> Object storage for configuration, logs, and
+artifacts.</li>
+<li><strong>Route53:</strong> DNS management and routing.</li>
+<li><strong>EC2:</strong> Compute resources for running native
+services.</li>
+<li><strong>VPC:</strong> Network isolation and security
+boundaries.</li>
+<li><strong>CloudWatch:</strong> Monitoring and logging
+infrastructure.</li>
+<li><strong>Certificate Manager:</strong> SSL/TLS certificate
+provisioning and management.</li>
+<li><strong>Key Management Service (KMS):</strong> Encryption keys
+management.</li>
+<li><strong>IAM:</strong> Identity and access management.</li>
+<li><strong>Lambda &amp; SNS:</strong> Event-driven functions and
+notifications.</li>
+</ul></li>
+</ul>
+<h2
+id="installation-process-of-native-services-on-virtual-instances">Installation
+Process of Native Services on Virtual Instances</h2>
+<p>Native services are installed using <strong>Ansible
+playbooks</strong>. To maintain scalability and reusability, playbooks
+are organized into logical parts:</p>
+<ol type="1">
+<li><p><strong>Shared Components:</strong><br />
+Common prerequisites, variables, credentials, and baseline tools (e.g.,
+<code>mc</code>, <code>htop</code>) are stored in a shared location.
+Metric publishers like <code>telegraf</code> and notification clients
+like Discord bots are also included to ensure each instance can report
+status and metrics.</p></li>
+<li><p><strong>Service-Specific “Stuff”:</strong><br />
+The “stuff” section of each playbook handles unique configuration tasks
+required for a particular service (e.g., Redis, MySQL). This
+encapsulation keeps customization straightforward and
+localized.</p></li>
+</ol>
+<h3 id="configuration-scopes">Configuration Scopes</h3>
+<p>Configurations are divided into three distinct scopes to streamline
+adjustments and overrides:</p>
+<ul>
+<li><p><strong>Global Scope:</strong><br />
+Hosted in an internal S3 bucket acting as an HTTP server for
+organization-wide settings.</p></li>
+<li><p><strong>Account Scope:</strong><br />
+Utilizes AWS Systems Manager (SSM) and an S3 bucket as an HTTP server
+for account-specific configurations.</p></li>
+<li><p><strong>Service Scope:</strong><br />
+Driven by autoscaling tags, allowing tailored adjustments to each
+service’s runtime environment.</p></li>
+</ul>
+<h3 id="metrics-and-observability">Metrics and Observability</h3>
+<p>To ensure transparency and facilitate data-driven decision-making,
+<code>telegraf</code> is installed on each instance to gather metrics
+such as memory, storage, CPU usage, and service health. These metrics
+are initially pushed to CloudWatch. However, due to rising costs, we are
+considering alternatives like <strong>Grafana Mimir</strong> to optimize
+performance without sacrificing insights.</p>
+<h2 id="golden-images-ami-advantages">Golden Images (AMI)
+Advantages</h2>
+<p><strong>Golden images</strong> (AMIs) provide a robust foundation for
+reliable and rapid instance provisioning:</p>
+<ol type="1">
+<li><p><strong>Pre-Installed Dependencies:</strong><br />
+3rd-party packages and dependencies are baked into the AMI, reducing
+setup time during instance launches.</p></li>
+<li><p><strong>Fast Deployment:</strong><br />
+Instances can be quickly spun up from these pre-configured images,
+accelerating auto-scaling and recovery processes.</p></li>
+</ol>
+<p>To support the golden-image workflow, we separated the Ansible
+playbook flow into two tags:</p>
+<ul>
+<li><p><strong>Installation Tag:</strong><br />
+Used for creating golden images via Packer.</p></li>
+<li><p><strong>Configuration Tag:</strong><br />
+Used to transform the pre-baked image into a fully functional service
+instance.</p></li>
+</ul>
+<h2 id="image-creation-with-packer">Image Creation with Packer</h2>
+<p>We selected <strong>HashiCorp Packer</strong> to build and manage
+AMIs due to its seamless integration with AWS services, support for
+multiple distributions (e.g., Amazon Linux 2 and AL2023), and ability to
+leverage AWS Secrets Manager for secure configurations.</p>
+<p><strong>Highlights:</strong></p>
+<ul>
+<li><p><strong>Shared Configurations:</strong><br />
+Packer templates are centrally stored, reducing overhead and
+complexity.</p></li>
+<li><p><strong>Notifications:</strong><br />
+Packer builds send success/failure notifications to a Discord channel,
+including AMI IDs and service names.</p></li>
+<li><p><strong>Multi-Distribution Support:</strong><br />
+Supports both AL2 and AL2023 images within the same pipeline.</p></li>
+</ul>
+<h2 id="ami-distribution-and-encryption-challenges">AMI Distribution and
+Encryption Challenges</h2>
+<p>To handle multi-region, encrypted AMI distribution across independent
+AWS accounts (STG and PROD), we implemented the following strategy:</p>
+<ol type="1">
+<li><p><strong>Imaginarium Account:</strong><br />
+A dedicated account (“imagenarium”) hosts the initial AMI build.
+Snapshots begin unencrypted.</p></li>
+<li><p><strong>Sharing and Copying:</strong><br />
+After Packer completes, the unencrypted AMI is shared with target
+accounts (STG/PROD). Each environment then copies and encrypts the AMI
+within its own AWS account, ensuring compliance with security policies
+and KMS key usage constraints.</p></li>
+</ol>
+<p>This approach avoids complex multi-region KMS management and
+resource-heavy re-encryption workflows.</p>
+<h2 id="cleanup-and-maintenance">Cleanup and Maintenance</h2>
+<p>Automated clean-up processes were implemented to manage resource
+sprawl:</p>
+<ul>
+<li><p><strong>Scheduled Cleanup:</strong><br />
+A GitHub Action runs at intervals to shut down test instances, remove
+outdated volumes and DNS records, deregister old AMIs, and prune
+snapshots.</p></li>
+<li><p><strong>Version Retention:</strong><br />
+Only a predefined number of AMI versions per service are retained,
+ensuring a tidy and cost-effective environment.</p></li>
+</ul>
+<h2 id="final-state-and-cost-metrics">Final State and Cost Metrics</h2>
+<h3 id="staging-stg-environment">Staging (STG) Environment</h3>
+<ul>
+<li><strong>Servers:</strong> 17</li>
+<li><strong>Total vCPU:</strong> 38</li>
+<li><strong>Total Memory:</strong> 43.5 GiB</li>
+<li><strong>Total Disk Storage:</strong> 573 GiB</li>
+<li><strong>Monthly Cost:</strong> ~$181</li>
+</ul>
+<h3 id="production-environment">Production Environment</h3>
+<ul>
+<li><strong>Servers:</strong> 27</li>
+<li><strong>Total vCPU:</strong> 69</li>
+<li><strong>Total Memory:</strong> 221 GiB</li>
+<li><strong>Total Disk Storage:</strong> 1542 GiB</li>
+<li><strong>Monthly Cost:</strong> ~$1300</li>
+</ul>
+<p>The final setup delivers flexible, lightweight, and adjustable
+environments that are cost-effective and secure.</p>
+<h2 id="tools-and-libraries-used">Tools and Libraries Used</h2>
+<ul>
+<li><strong>HashiCorp Vagrant + vagrant-aws</strong></li>
+<li><strong>Ansible</strong></li>
+<li><strong>HashiCorp Packer</strong></li>
+<li><strong>VS Code</strong></li>
+<li><strong>AWS (S3, EC2, VPC, CloudWatch, etc.)</strong></li>
+<li><strong>Discord for Notifications</strong></li>
+<li><strong>GitHub for CI/CD</strong></li>
+<li><strong>Bash Scripting</strong></li>
+</ul>
+<h2 id="configuration-and-installation-details">Configuration and
+Installation Details</h2>
+<h3 id="native-services-installation-process">Native Services
+Installation Process</h3>
+<ul>
+<li><p><strong>Ansible Playbooks:</strong><br />
+Installation of native services is automated using Ansible playbooks.
+These playbooks are modular, with shared components for prerequisites,
+variables, and credentials, and dedicated sections for each
+service.</p></li>
+<li><p><strong>Shared Components Include:</strong></p>
+<ul>
+<li>Prerequisites</li>
+<li>Variables and credentials</li>
+<li>Access control</li>
+<li>Basic management tools (<code>mc</code>, <code>htop</code>)</li>
+<li>Metric publisher (<code>telegraf</code>)</li>
+<li>Discord client for notifications</li>
+</ul></li>
+<li><p><strong>Service-Specific “Stuff”:</strong><br />
+Focused on the unique requirements of each service, ensuring clean and
+maintainable playbooks.</p></li>
+</ul>
+<h3 id="configuration-scopes-1">Configuration Scopes</h3>
+<ul>
+<li><p><strong>Global Scope:</strong><br />
+Utilizes an internal S3 bucket as an HTTP server for organization-wide
+configurations.</p></li>
+<li><p><strong>Account Scope:</strong><br />
+Employs AWS Systems Manager and an S3 bucket for account-specific
+settings.</p></li>
+<li><p><strong>Service Scope:</strong><br />
+Managed via autoscaling tags to allow dynamic adjustments based on
+service demands.</p></li>
+</ul>
+<h3 id="metrics-collection">Metrics Collection</h3>
+<ul>
+<li><p><strong>Telegraf:</strong><br />
+Installed on each instance to collect metrics such as memory, storage,
+CPU usage, and service health.</p></li>
+<li><p><strong>CloudWatch:</strong><br />
+Initially used for metrics aggregation and alerting. Due to cost
+concerns, migrating to <strong>Grafana Mimir</strong> is being
+considered to reduce expenses while maintaining observability.</p></li>
+</ul>
+<h2 id="golden-image-ami-and-installation-configuration">Golden Image
+(AMI) and Installation Configuration</h2>
+<h3 id="advantages-of-golden-images">Advantages of Golden Images</h3>
+<ol type="1">
+<li><p><strong>Pre-Installed Dependencies:</strong><br />
+All necessary 3rd-party packages are included in the AMI, ensuring
+consistency and reducing deployment time.</p></li>
+<li><p><strong>Fast Deployment:</strong><br />
+Ready-to-use instances can be launched quickly, enhancing scalability
+and reliability.</p></li>
+</ol>
+<h3 id="playbook-flow-separation">Playbook Flow Separation</h3>
+<ul>
+<li><p><strong>Installation Tag:</strong><br />
+Handles the creation of golden images using Packer.</p></li>
+<li><p><strong>Configuration Tag:</strong><br />
+Manages the configuration of instances post-deployment to ensure they
+are fully operational.</p></li>
+</ul>
+<h3 id="challenges-and-solutions">Challenges and Solutions</h3>
+<ul>
+<li><strong>3rd-Party Roles Execution:</strong><br />
+Overcame difficulties with inline variables and role rewrites to
+maintain playbook integrity and functionality.</li>
+</ul>
+<h2 id="packerimage-tool">Packer/Image Tool</h2>
+<p><strong>HashiCorp Packer</strong> was chosen for its robust features
+and integration capabilities:</p>
+<ul>
+<li><p><strong>Integration with AWS Secrets Manager:</strong><br />
+Securely manages configurations and secrets during image
+builds.</p></li>
+<li><p><strong>Abstracted Configuration Groups:</strong><br />
+References specific Linux distributions, allowing flexibility and
+reusability.</p></li>
+<li><p><strong>Shared Configuration Management:</strong><br />
+Centralized Packer configurations reduce redundancy and simplify
+maintenance.</p></li>
+<li><p><strong>Notifications:</strong><br />
+Automated GitHub workflows send detailed success/failure notifications
+to Discord, including AMI IDs and service versions.</p></li>
+</ul>
+<h2 id="ami-distribution-and-assignment">AMI Distribution and
+Assignment</h2>
+<ul>
+<li><strong>Image Copying and Assignment:</strong><br />
+Utilized shared GitHub workflows and Bash scripts (with AI assistance)
+to copy images, assign them to templates, and clean up old images.</li>
+</ul>
+<h3
+id="limitation-of-disksnapshot-encryption-in-copy-and-solutions">Limitation
+of Disk/Snapshot Encryption in Copy and Solutions</h3>
+<p><strong>Security and Zero Trust:</strong><br />
+All snapshots and volumes are encrypted, and environments are placed in
+different regions, introducing several limitations.</p>
+<p><strong>Solution:</strong></p>
+<ol type="1">
+<li><p><strong>KMS Integration:</strong><br />
+Volumes and snapshots reference AWS-managed KMS keys for encryption and
+decryption.</p></li>
+<li><p><strong>Snapshot Copy Options:</strong></p>
+<ul>
+<li><strong>Multi-Region KMS:</strong><br />
+Too restrictive as it requires cross-account access.</li>
+<li><strong>Re-Encrypt Mechanism:</strong><br />
+Complex and time-consuming, with dependencies.</li>
+<li><strong>Elegant AMI+Snapshot Copy:</strong>
+<ul>
+<li>Create a separate STG region/account called
+<strong>‘imagenarium’</strong> for initial AMI creation.</li>
+<li>Packer runs in imagenarium, creates unencrypted AMIs, and encrypts
+them upon copying.</li>
+<li>Provide STG/PROD account IDs as parameters in Packer.</li>
+<li>Each environment initializes the AMI copy and assigns it to the
+respective autoscaling group.</li>
+</ul></li>
+</ul></li>
+</ol>
+<h2 id="clean-processes">Clean Processes</h2>
+<p>To prevent resource sprawl and manage costs, automated clean-up
+workflows were implemented:</p>
+<ul>
+<li><strong>Scheduled Cleaners:</strong><br />
+GitHub Actions that:
+<ul>
+<li>Shut down test instances.</li>
+<li>Delete test volumes, DNS records, and snapshots.</li>
+<li>Deregister test AMIs.</li>
+</ul></li>
+<li><strong>Version Retention Policies:</strong><br />
+Maintain only a predefined number of AMI versions per native service to
+ensure a clean and efficient environment.</li>
+</ul>
+<h2 id="final-state">Final State</h2>
+<h3 id="staging-stg-environment-1">Staging (STG) Environment</h3>
+<ul>
+<li><strong>Servers:</strong> 17</li>
+<li><strong>Total vCPU:</strong> 38</li>
+<li><strong>Total Memory:</strong> 43.5 GiB</li>
+<li><strong>Total Disk Storage:</strong> 573 GiB</li>
+<li><strong>Monthly Cost:</strong> ~$181</li>
+</ul>
+<h3 id="production-environment-1">Production Environment</h3>
+<ul>
+<li><strong>Servers:</strong> 27</li>
+<li><strong>Total vCPU:</strong> 69</li>
+<li><strong>Total Memory:</strong> 221 GiB</li>
+<li><strong>Total Disk Storage:</strong> 1542 GiB</li>
+<li><strong>Monthly Cost:</strong> ~$1300</li>
+</ul>
+<p>The environment is now flexible, lightweight, and easily adjustable.
+We can scale up or down, switch metrics tools, and maintain secure,
+encrypted resources without sacrificing performance.</p>
+<h2 id="used-tools-and-libraries">Used Tools and Libraries</h2>
+<ul>
+<li><strong>HashiCorp Vagrant + vagrant-aws</strong></li>
+<li><strong>Ansible</strong></li>
+<li><strong>HashiCorp Packer</strong></li>
+<li><strong>VS Code</strong></li>
+<li><strong>AWS (S3, EC2, VPC, CloudWatch, etc.)</strong></li>
+<li><strong>Discord for Notifications</strong></li>
+<li><strong>GitHub for CI/CD</strong></li>
+<li><strong>Bash Scripting</strong></li>
+</ul>
+<h2 id="community-and-contributions">Community and Contributions</h2>
+<p>We extend our gratitude to everyone who contributed to this project.
+The <strong>Inqwise Team</strong> worked together to bring DevFinOps to
+fruition, and we welcome new contributors to join our community and help
+improve DevFinOps.</p>
+<ul>
+<li><strong>Website:</strong> <a
+href="https://www.inqwise.com">www.inqwise.com</a></li>
+<li><strong>Discord:</strong> <a
+href="https://discord.gg/hcqSZJFc">https://discord.gg/hcqSZJFc</a></li>
+<li><strong>GitHub:</strong> <a
+href="https://github.com/orgs/inqwise">https://github.com/orgs/inqwise</a></li>
+</ul>
+<p><strong>Join us and implement these processes in your own
+environments to achieve a cost-aware, automated, and secure cloud
+infrastructure!</strong></p>
+<hr />
