@@ -2,12 +2,13 @@
 
 **Project Status:** Completed  
 **Last Updated:** December 17, 2024
+**Autor:** Alex Misyuk
 
 ## Introduction
 
 As a technical enthusiast, I am always investigating and researching different aspects of the digital universe. Last year, I focused my research on **“Environment Costing”**, which explores how to create cloud application environments with minimal costs. This project, **DevFinOps**, embodies the principles of DevOps, FinOps, and operational excellence to achieve cost-effective, secure, and automated cloud infrastructures.
 
-This project was collaboratively processed by the **Inqwise Team**, leveraging our collective expertise to transform legacy environments into flexible, secure, and cost-aware AWS-based deployments. By employing automated processes, golden images, managed services, and well-defined CI/CD pipelines, we have achieved a more resilient and financially predictable infrastructure.
+This project was processed by the **Inqwise Team**, leveraging our collective expertise to transform legacy environments into flexible, secure, and cost-aware AWS-based deployments. By employing automated processes, golden images, managed services, and well-defined CI/CD pipelines, we have achieved a more resilient and financially predictable infrastructure.
 
 ## Initial State of the Project
 
